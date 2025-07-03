@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -33,16 +32,12 @@ public class MedicoService {
         return false;
     }
 
-
+    // Simula consulta a um serviço externo de validação de CRM
     public Medico consultarCrm(String crm) {
-
+        // Aqui usamos uma URL fictícia. Em ambiente real, use serviço real ou simulado
         String url = "http://localhost:8081/crm/" + crm;
 
         // Simula busca externa, o retorno deve ter a mesma estrutura de Medico
         return restTemplate.getForObject(url, Medico.class);
-    }
-
-    public List<Medico> listarTodos() {
-        return medicoRepository.findAll();
     }
 }

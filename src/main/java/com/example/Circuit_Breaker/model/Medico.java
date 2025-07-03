@@ -1,17 +1,8 @@
 package com.example.Circuit_Breaker.model;
 
 import jakarta.persistence.*;
-import org.springframework.http.ResponseEntity;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Entity
-@Getter
-@Setter
-@NoArgsConstructor // Cria o construtor vazio
-@AllArgsConstructor
 public class Medico {
 
     @Id
@@ -21,7 +12,13 @@ public class Medico {
     private String nome;
     private String crm;
 
-    public Medico(ResponseEntity<Medico> buscar, String nome, String crm) {}
+    public Medico() {}
+
+    public Medico(Long id, String nome, String crm) {
+        this.id = id;
+        this.nome = nome;
+        this.crm = crm;
+    }
 
     // Getters e Setters
     public Long getId() { return id; }
