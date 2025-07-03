@@ -38,23 +38,17 @@ Este projeto inclui:
 ## 🗂️ Estrutura do Projeto
 
 ```
-
-circuit-breaker-springboot/
-├── src/
-│   └── main/
-│       └── java/com/example/circuitbreaker/
-│           ├── controller/MedicoController.java
-│           ├── model/Medico.java
-│           ├── repository/MedicoRepository.java
-│           ├── service/MedicoService.java
-│           ├── CircuitBreakerApplication.java
-├── docker/
-│   └── Dockerfile
-├── postman/
-│   └── CircuitBreaker.postman\_collection.json
-├── pom.xml
-└── README.md
-
+<br><br>
+Circuit-Breaker/ <br>
+├── src/main/java/com.example.Circuit_Breaker <br>
+│ └── controller/MedicoController.java <br>
+│ └── model/Medico.java <br>
+│ └── repository/MedicoRepository.java <br>
+│ └── service/MedicoService.java <br>
+│ └── CircuitBreakerApplication.java <br>
+├── pom.xml <br>
+└── README.md <br>
+<br><br>
 ````
 
 ---
