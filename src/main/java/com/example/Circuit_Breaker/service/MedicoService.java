@@ -1,43 +1,48 @@
 package com.example.Circuit_Breaker.service;
 
+import com.example.Circuit_Breaker.dtos.MedicoDTO;
 import com.example.Circuit_Breaker.model.Medico;
 import com.example.Circuit_Breaker.repository.MedicoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class MedicoService {
 
     @Autowired
     private MedicoRepository medicoRepository;
+    private final RestTemplate restTemplate;
 
-    private final RestTemplate restTemplate = new RestTemplate();
 
-    public Medico salvar(Medico medico) {
-        return medicoRepository.save(medico);
+    public MedicoService(MedicoRepository medicoRepository, RestTemplate restTemplate) {
+        this.medicoRepository = medicoRepository;
+        this.restTemplate = restTemplate;
+    }
+
+    public MedicoDTO salvar(MedicoDTO medicoDTO) {
+        Medico medico = medicoDTO.toEntity();
+        medico = medicoRepository.save(medico);
+        return MedicoDTO.from(medico);
     }
 
     public Optional<Medico> buscarPorId(Long id) {
+
         return medicoRepository.findById(id);
     }
 
-    public boolean deletar(Long id) {
-        if (medicoRepository.existsById(id)) {
-            medicoRepository.deleteById(id);
-            return true;
-        }
-        return false;
+    public List<MedicoDTO> listarTodos() {
+        List<Medico> medicos = medicoRepository.findAll();
+        return medicos.stream().map(MedicoDTO::from).collect(Collectors.toList());
     }
 
-    // Simula consulta a um serviço externo de validação de CRM
-    public Medico consultarCrm(String crm) {
-        // Aqui usamos uma URL fictícia. Em ambiente real, use serviço real ou simulado
-        String url = "http://localhost:8081/crm/" + crm;
-
-        // Simula busca externa, o retorno deve ter a mesma estrutura de Medico
-        return restTemplate.getForObject(url, Medico.class);
+    public Medico consultarCrmExterno(String crm) {
+        String url = "http://localhost:9090/servico-externo/crm/" + crm;
+        Medico medico = restTemplate.getForObject(url, Medico.class);
+        return medicoRepository.findByCrm(crm);
     }
 }

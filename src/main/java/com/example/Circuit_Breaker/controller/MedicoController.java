@@ -1,57 +1,49 @@
 package com.example.Circuit_Breaker.controller;
 
+import com.example.Circuit_Breaker.dtos.MedicoDTO;
 import com.example.Circuit_Breaker.model.Medico;
 import com.example.Circuit_Breaker.service.MedicoService;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.HttpClientErrorException;
 
-        import java.util.Optional;
+import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/medicos")
 public class MedicoController {
 
+    private final MedicoService medicoService;
+
     @Autowired
-    private MedicoService medicoService;
+    public MedicoController(MedicoService medicoService) {
+        this.medicoService = medicoService;
+    }
 
     @PostMapping
-    public ResponseEntity<Medico> cadastrar(@RequestBody Medico medico) {
-        Medico salvo = medicoService.salvar(medico);
+    public ResponseEntity<MedicoDTO> cadastrar(@RequestBody MedicoDTO medicoDTO) {
+        MedicoDTO salvo = medicoService.salvar(medicoDTO);
         return ResponseEntity.ok(salvo);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Medico> buscar(@PathVariable Long id) {
-        Optional<Medico> medico = medicoService.buscarPorId(id);
-        return medico.map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<MedicoDTO> buscarPorId(@PathVariable Long id) {
+        MedicoDTO medicoDTO = medicoService.buscarPorId(id);
+        return ResponseEntity.ok(medicoDTO);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletar(@PathVariable Long id) {
-        boolean deletado = medicoService.deletar(id);
-        if (deletado) {
-            return ResponseEntity.noContent().build();
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+    @GetMapping
+    public ResponseEntity<List<MedicoDTO>> listarTodos() {
+        List<MedicoDTO> medicos = medicoService.listarTodos();
+        return ResponseEntity.ok(medicos);
     }
-
 
     @GetMapping("/crm/{crm}")
-    @CircuitBreaker(name = "crmService", fallbackMethod = "fallbackCrm")
-    public ResponseEntity<Medico> consultarCrm(@PathVariable String crm) {
-        Medico medico = medicoService.consultarCrm(crm); // simula chamada externa
-        return ResponseEntity.ok(medico);
-    }
-
-    public ResponseEntity<Medico> fallbackCrm(String crm, Long id, String nome, Throwable t) {
-        Medico fallback = new Medico(id, nome, crm );
-        fallback.setNome("Médico Desconhecido (Fallback)");
-        fallback.setCrm(crm);
-        return ResponseEntity.ok(fallback);
+    public ResponseEntity<MedicoDTO> consultarCrmExterno(@PathVariable String crm) {
+        MedicoDTO medicoDTO = medicoService.consultarCrmExterno(crm);
+        return ResponseEntity.ok(medicoDTO);
     }
 }
-
