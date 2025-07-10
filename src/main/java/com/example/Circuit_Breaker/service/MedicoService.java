@@ -51,5 +51,9 @@ public class MedicoService {
         medico.setNome("Médico (fallback) não está cadastrado");
         return medico;
     }
+
+    public Medico salvar(Medico medico) {
+        return medicoRepository.save(medico);
+    }
 }
 

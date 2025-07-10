@@ -30,4 +30,10 @@ public class MedicoController {
         Medico medico = medicoService.consultaPorCrm(crm);
         return ResponseEntity.ok(medico);
     }
+
+    @PostMapping
+    public ResponseEntity<Medico> cadastrar(@RequestBody Medico medico) {
+        Medico salvo = medicoService.salvar(medico);
+        return ResponseEntity.ok(salvo);
+    }
 }
