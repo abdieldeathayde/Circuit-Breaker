@@ -2,29 +2,33 @@ package com.example.Circuit_Breaker.service;
 
 import com.example.Circuit_Breaker.model.Medico;
 import com.example.Circuit_Breaker.repository.MedicoRepository;
+import com.example.Circuit_Breaker.service.MedicoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
-@Profile("dev")
 @Service
-public class DevMedicoService {
-
-    private final MedicoRepository medicoRepository;
-    private final RestTemplate restTemplate;
+@Profile("dev")
+public class DevMedicoService extends MedicoService {
 
     @Autowired
-    public DevMedicoService(MedicoRepository medicoRepository, RestTemplate restTemplate) {
-        this.medicoRepository = medicoRepository;
-        this.restTemplate = restTemplate;
+    private MedicoRepository medicoRepository;
+
+    @Override
+    public Medico consultaPorCrm(String crm) {
+        // fallback ou comportamento alternativo no profile dev
+        Medico medico = new Medico();
+        medico.setNome("Dr. Dev Fallback");
+        medico.setCrm(crm);
+        return medicoRepository.save(medico);
     }
 
-    public MedicoRepository getMedicoRepository() {
-        return medicoRepository;
-    }
-
-    public RestTemplate getRestTemplate() {
-        return restTemplate;
+    @Override
+    public Medico consultaPorId(Long id) {
+        Medico medico = new Medico();
+        medico.setId(id);
+        medico.setNome("Médico Fallback Dev");
+        medico.setCrm("0000-DEV");
+        return medico;
     }
 }

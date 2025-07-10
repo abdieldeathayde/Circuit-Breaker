@@ -16,34 +16,18 @@ import java.util.Optional;
 @RequestMapping("/medicos")
 public class MedicoController {
 
-    private final MedicoService medicoService;
-
     @Autowired
-    public MedicoController(MedicoService medicoService) {
-        this.medicoService = medicoService;
-    }
+    private MedicoService medicoService;
 
-    @PostMapping
-    public ResponseEntity<MedicoDTO> cadastrar(@RequestBody MedicoDTO medicoDTO) {
-        MedicoDTO salvo = medicoService.salvar(medicoDTO);
-        return ResponseEntity.ok(salvo);
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<MedicoDTO> buscarPorId(@PathVariable Long id) {
-        MedicoDTO medicoDTO = medicoService.buscarPorId(id);
-        return ResponseEntity.ok(medicoDTO);
-    }
-
-    @GetMapping
-    public ResponseEntity<List<MedicoDTO>> listarTodos() {
-        List<MedicoDTO> medicos = medicoService.listarTodos();
-        return ResponseEntity.ok(medicos);
+    @GetMapping("/id/{id}")
+    public ResponseEntity<Medico> buscarPorId(@PathVariable Long id) {
+        Medico medico = medicoService.consultaPorId(id);
+        return ResponseEntity.ok(medico);
     }
 
     @GetMapping("/crm/{crm}")
-    public ResponseEntity<MedicoDTO> consultarCrmExterno(@PathVariable String crm) {
-        MedicoDTO medicoDTO = medicoService.consultarCrmExterno(crm);
-        return ResponseEntity.ok(medicoDTO);
+    public ResponseEntity<Medico> buscarPorCrm(@PathVariable String crm) {
+        Medico medico = medicoService.consultaPorCrm(crm);
+        return ResponseEntity.ok(medico);
     }
 }

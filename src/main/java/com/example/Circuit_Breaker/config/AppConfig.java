@@ -11,6 +11,7 @@ import java.time.Duration;
 @Configuration
 public class AppConfig {
 
+
     @Bean
     @Profile("dev")
     public RestTemplate devRestTemplate() {

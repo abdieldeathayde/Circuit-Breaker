@@ -1,0 +1,11 @@
+resilience4j:
+  circuitbreaker:
+    instances:
+      medicoPorCrmService:
+        sliding-window-size: 5
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 10s
+      medicoPorIdService:
+        sliding-window-size: 5
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 10s

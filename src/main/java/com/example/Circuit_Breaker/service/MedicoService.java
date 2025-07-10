@@ -1,48 +1,55 @@
 package com.example.Circuit_Breaker.service;
 
-import com.example.Circuit_Breaker.dtos.MedicoDTO;
 import com.example.Circuit_Breaker.model.Medico;
 import com.example.Circuit_Breaker.repository.MedicoRepository;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.HttpClientErrorException;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @Service
 public class MedicoService {
 
     @Autowired
     private MedicoRepository medicoRepository;
-    private final RestTemplate restTemplate;
 
-
-    public MedicoService(MedicoRepository medicoRepository, RestTemplate restTemplate) {
-        this.medicoRepository = medicoRepository;
-        this.restTemplate = restTemplate;
+    @CircuitBreaker(name = "medicoPorCrmService", fallbackMethod = "fallbackPorCrm")
+    @Retryable(
+            value = {HttpClientErrorException.class},
+            maxAttempts = 2,
+            backoff = @Backoff(delay = 500)
+    )
+    public Medico consultaPorCrm(String crm) {
+        return medicoRepository.findByCrm(crm)
+                .orElseThrow(() -> new HttpClientErrorException(HttpStatus.NOT_FOUND, "Não encontrado"));
     }
 
-    public MedicoDTO salvar(MedicoDTO medicoDTO) {
-        Medico medico = medicoDTO.toEntity();
-        medico = medicoRepository.save(medico);
-        return MedicoDTO.from(medico);
+    public Medico fallbackPorCrm(String crm, Throwable ex) {
+        Medico medico = new Medico();
+        medico.setCrm(crm);
+        medico.setNome("Médico (fallback) não está cadastrado");
+        return medico;
     }
 
-    public Optional<Medico> buscarPorId(Long id) {
-
-        return medicoRepository.findById(id);
+    // Mesma lógica para ID:
+    @CircuitBreaker(name = "medicoPorIdService", fallbackMethod = "fallbackPorId")
+    @Retryable(value = {HttpClientErrorException.class}, maxAttempts = 2, backoff = @Backoff(delay = 500))
+    public Medico consultaPorId(Long id) {
+        return medicoRepository.findById(id)
+                .orElseThrow(() -> new HttpClientErrorException(HttpStatus.NOT_FOUND, "Não encontrado"));
     }
 
-    public List<MedicoDTO> listarTodos() {
-        List<Medico> medicos = medicoRepository.findAll();
-        return medicos.stream().map(MedicoDTO::from).collect(Collectors.toList());
-    }
-
-    public Medico consultarCrmExterno(String crm) {
-        String url = "http://localhost:9090/servico-externo/crm/" + crm;
-        Medico medico = restTemplate.getForObject(url, Medico.class);
-        return medicoRepository.findByCrm(crm);
+    public Medico fallbackPorId(Long id, Throwable ex) {
+        Medico medico = new Medico();
+        medico.setId(id);
+        medico.setCrm("N/A");
+        medico.setNome("Médico (fallback) não está cadastrado");
+        return medico;
     }
 }
+
